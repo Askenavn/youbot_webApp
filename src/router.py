@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from schemas import SYoubotTargetAdd, SYoubotCurAdd, SYoubotCur, SYoubotTarget, SVelocityTargetAdd, SVelocityTarget
+from schemas import SYoubotTargetAdd, SYoubotCurAdd, SVelocityTargetAdd, SFigureAdd
 from repository import YoubotTargetRepository, YoubotRepository, YoubotVelocityRepository
 
 
@@ -25,6 +25,18 @@ async def get_target(aruco_id: int,):
 async def get_all_targets():
     targets = await YoubotTargetRepository.find_all_targets()
     return {*targets}
+
+@target_router.post("/figure/")
+async def add_figure(aruco_id: int, figure: SFigureAdd = Depends()):
+    return await YoubotTargetRepository.add_figure(aruco_id, figure)
+
+@target_router.put("/figure/")
+async def add_figure(aruco_id: int, figure: SFigureAdd = Depends()):
+    return await YoubotTargetRepository.set_new_figure(aruco_id, figure)
+
+@target_router.get("/figure/")
+async def get_figure(aruco_id: int = None):
+    return {*await YoubotTargetRepository.get_figures(aruco_id)}
 #@@@@@  TARGETS  @@@@@#
 
 

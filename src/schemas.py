@@ -33,3 +33,13 @@ class SVelocityTarget(SVelocityTargetAdd):
     id: int
     model_config = ConfigDict(from_attributes=True)
 
+
+class SFigureAdd(BaseModel):
+    aruco_id: Union[int, None] = 1
+    name: Union[str, None] = None
+
+class SFigure(SFigureAdd):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+

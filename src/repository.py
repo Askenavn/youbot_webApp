@@ -1,6 +1,8 @@
 from sqlalchemy import select, update, desc
-from database import new_session, YoubotTargetOrm, YoubotOrm, YoubotVelocityORM
-from schemas import SYoubotCurAdd, SYoubotTargetAdd, SVelocityTargetAdd
+from database import new_session, YoubotTargetOrm, YoubotOrm, YoubotVelocityORM, TargetFigureORM
+from schemas import SYoubotCurAdd, SYoubotTargetAdd, SVelocityTargetAdd, SFigureAdd
+
+fig_names = ('circle', 'spiral', 'deltoid', 'spiral_diff', 'circle_diff')
 
 
 class YoubotTargetRepository:
@@ -30,10 +32,58 @@ class YoubotTargetRepository:
             result = await session.execute(query)
             target_models = result.scalars().all()
             return target_models
+        
+    @classmethod
+    async def add_figure(cls, au_id, fig: SFigureAdd):
+        async with new_session() as session:
+            if await session.get(TargetFigureORM, au_id) is None:
+                fig_dict = fig.model_dump()
+                fig = TargetFigureORM(**fig_dict)
+                if fig.name in fig_names:
+                    session.add(fig)
+                    await session.flush()
+                    await session.commit()
+                    return {"ok": True}
+                else:
+                    return {'ok': False, 'msg': 'No fig name matched'}
+            else:
+                return {'ok': False, 'msg': 'Already exsists'}
+                    
+    @classmethod
+    async def set_new_figure(cls, au_id, fig: SFigureAdd):
+        async with new_session() as session:
+            try:
+                if fig.name in fig_names:
+                    query = (update(TargetFigureORM).
+                            where(TargetFigureORM.aruco_id == au_id).
+                            values(name = fig.name))
+                    await session.execute(query)
+                    await session.flush()
+                    await session.commit()
+                    return {'ok': True}
+                else:
+                    session.rollback()
+                    return {'ok': False, 'msg': 'No fig name matched'}
+            except:
+                session.rollback()
+                return {'ok': False}
+            
+    @classmethod
+    async def get_figures(cls, id = None):
+        try:
+            async with new_session() as session:
+                query = select(TargetFigureORM).order_by(TargetFigureORM.aruco_id)
+                if id is not None:
+                    query = query.where(TargetFigureORM.aruco_id == id)
+                result = await session.execute(query)
+                return result.scalars().all()
+        except:
+            raise 
+
+            
 
 
 class YoubotRepository:             
-
     @classmethod
     async def add_youbot(cls, youbot: SYoubotCurAdd):
         async with new_session() as session:
@@ -83,7 +133,6 @@ class YoubotRepository:
 
 
 class YoubotVelocityRepository:
-
     @classmethod
     async def add_velocity(cls, au_id, velocity: SVelocityTargetAdd):
         async with new_session() as session:

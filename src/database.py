@@ -34,6 +34,13 @@ class YoubotVelocityORM(Model):
     x: Mapped[float]
     y: Mapped[float]
     theta: Mapped[float]
+
+
+class TargetFigureORM(Model):
+    __tablename__ = 'figures'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    aruco_id: Mapped[int]
+    name: Mapped[str]
     
    
 async def create_tables():
