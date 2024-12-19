@@ -2,7 +2,7 @@ from sqlalchemy import select, update, desc
 from database import new_session, YoubotTargetOrm, YoubotOrm, YoubotVelocityORM, TargetFigureORM
 from schemas import SYoubotCurAdd, SYoubotTargetAdd, SVelocityTargetAdd, SFigureAdd
 
-fig_names = ('circle', 'spiral', 'deltoid', 'spiral_diff', 'circle_diff')
+fig_names = ('circle', 'spiral', 'deltoid', 'spiral_diff', 'circle_diff', 'astroid', 'gipocicloid', 'epicycloid', 'heart')
 
 
 class YoubotTargetRepository:
@@ -56,7 +56,7 @@ class YoubotTargetRepository:
                 if fig.name in fig_names:
                     query = (update(TargetFigureORM).
                             where(TargetFigureORM.aruco_id == au_id).
-                            values(name = fig.name))
+                            values(name = fig.name, r = fig.r, k = fig.k))
                     await session.execute(query)
                     await session.flush()
                     await session.commit()
@@ -80,8 +80,7 @@ class YoubotTargetRepository:
         except:
             raise 
 
-            
-
+ 
 
 class YoubotRepository:             
     @classmethod
@@ -95,25 +94,20 @@ class YoubotRepository:
             return youbot.id
                 
     @classmethod
-    async def update_youbot(cls, youbot: SYoubotCurAdd):
+    async def update_youbot(cls,  youbot: SYoubotCurAdd):
         async with new_session() as session:
-            youbot_old = await session.get(YoubotOrm, youbot.aruco_id)
-            if youbot_old:
-                try:
-                    youbot_old.arm_count = youbot.arm_count
-                    await session.flush()
-                    await session.commit()
-                    return {"ok": True}
-                except:
-                    session.rollback()
-            return {"ok": False}
-
-
-        async with new_session() as session:
-            query = select(YoubotOrm).order_by(YoubotOrm.id).filter(YoubotOrm.aruco_id == youbot.aruco_id)
-            result = await session.execute(query)
-            youbot = result.scalars().all()
-            return youbot
+            try:
+                query = (update(YoubotOrm).
+                         where(YoubotOrm.aruco_id == youbot.aruco_id).
+                         values(arm_count = youbot.arm_count, status = youbot.status))
+                await session.execute(query)
+                await session.flush()
+                await session.commit()
+                return {'ok': True}
+            except:
+                session.rollback()
+                return {'ok': False}
+        
 
     @classmethod
     async def find_all_youbots(cls):

@@ -15,6 +15,7 @@ class YoubotOrm(Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     aruco_id: Mapped[int]
     arm_count: Mapped[int]
+    status: Mapped[str]
 
 
 class YoubotTargetOrm(Model):
@@ -41,6 +42,8 @@ class TargetFigureORM(Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     aruco_id: Mapped[int]
     name: Mapped[str]
+    r: Mapped[float]
+    k: Mapped[float]
     
    
 async def create_tables():

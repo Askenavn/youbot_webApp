@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 class SYoubotCurAdd(BaseModel):
     aruco_id: Union[int, None] = 1
     arm_count: Union[int, None] = 1
+    status: Union[str, None] = 'undefine'
 
 class SYoubotCur(SYoubotCurAdd):
     id: int
@@ -37,9 +38,12 @@ class SVelocityTarget(SVelocityTargetAdd):
 class SFigureAdd(BaseModel):
     aruco_id: Union[int, None] = 1
     name: Union[str, None] = None
+    r: Union[float, None] = 0.0
+    k: Union[float, None] = 0.0
 
 class SFigure(SFigureAdd):
     id: int
     model_config = ConfigDict(from_attributes=True)
+
 
 
